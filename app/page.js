@@ -1,9 +1,8 @@
-'use client'
+'use client';
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
-import { firestore } from "@/firebase";
 import { Box, Typography, Modal, Stack, TextField, Button, IconButton } from "@mui/material";
+import { firestore } from "@/firebase";
 import { collection, deleteDoc, doc, getDocs, query, getDoc, setDoc } from "firebase/firestore";
 
 export default function Home() {
