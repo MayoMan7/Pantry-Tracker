@@ -14,11 +14,9 @@ export default function Home() {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [user, setUser] = useState(null); // State to hold user data
   const [username, setUsername] = useState('');
-  
+
   const router = useRouter(); // Initialize the router
 
   useEffect(() => {
@@ -114,11 +112,6 @@ export default function Home() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setModalOpen(true);
-  };
-
   // LocalStorage helper functions
   const getUserLikes = () => {
     const likes = localStorage.getItem('userLikes');
@@ -146,7 +139,7 @@ export default function Home() {
     setUserLikes(userLikes);
   };
 
-  const handleLike = (itemName) => {
+  const handleLike = async (itemName) => {
     if (hasUserLiked(itemName)) {
       console.log('User already liked this item.');
       return;
@@ -161,9 +154,17 @@ export default function Home() {
         : item
     );
     setInventory(updatedInventory);
+
+    // Also update Firestore
+    const docRef = doc(collection(firestore, 'inventory'), itemName);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const { count } = docSnap.data();
+      await updateDoc(docRef, { count: count + 1 });
+    }
   };
 
-  const handleDislike = (itemName) => {
+  const handleDislike = async (itemName) => {
     if (!hasUserLiked(itemName)) {
       console.log('User has not liked this item.');
       return;
@@ -178,6 +179,14 @@ export default function Home() {
         : item
     );
     setInventory(updatedInventory);
+
+    // Also update Firestore
+    const docRef = doc(collection(firestore, 'inventory'), itemName);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const { count } = docSnap.data();
+      await updateDoc(docRef, { count: count - 1 });
+    }
   };
 
   return (
@@ -290,30 +299,18 @@ export default function Home() {
                 </CardContent>
                 <Divider />
                 <CardActions>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDislike(name);
-                    }}
-                    disabled={!hasUserLiked(name)}
+                  <IconButton
+                    color={hasUserLiked(name) ? 'primary' : 'default'}
+                    onClick={() => handleLike(name)}
                   >
-                    Dislike
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike(name);
-                    }}
-                    disabled={hasUserLiked(name)}
+                    👍
+                  </IconButton>
+                  <IconButton
+                    color={!hasUserLiked(name) ? 'secondary' : 'default'}
+                    onClick={() => handleDislike(name)}
                   >
-                    Like
-                  </Button>
+                    👎
+                  </IconButton>
                 </CardActions>
               </Card>
             </Grid>
