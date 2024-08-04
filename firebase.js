@@ -1,7 +1,7 @@
-// firebase.js
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';  // Import getStorage from firebase/storage
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAuth } from "firebase/auth"; // Import authentication
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,8 +13,11 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
+
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
-const storage = getStorage(app);  // Initialize Firebase Storage
+const storage = getStorage(app);
+const auth = getAuth(app); // Initialize authentication
 
-export { firestore, storage };
+export { firestore, storage, auth };
+
